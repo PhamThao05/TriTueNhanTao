@@ -1,8 +1,28 @@
 
 import os
 import socket
+import sys
 import threading
 import webbrowser
+
+
+def _restart_inside_local_venv():
+    """Use the bundled virtualenv when run.py is launched directly."""
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    venv_python = os.path.join(script_dir, '.venv', 'Scripts', 'python.exe')
+
+    if not os.path.exists(venv_python):
+        return
+
+    current_python = os.path.normcase(os.path.abspath(sys.executable))
+    target_python = os.path.normcase(os.path.abspath(venv_python))
+
+    if current_python != target_python:
+        os.execv(venv_python, [venv_python, *sys.argv])
+
+
+_restart_inside_local_venv()
+
 from flask import redirect, url_for
 from app import create_app, db
 from app.models import User, Employee, Attendance, SystemLog
